@@ -143,7 +143,8 @@ class GenericFormsBasedAuthenticator(SAMLAuthenticator):
         return self._extract_saml_assertion_from_response(response)
 
     def _validate_config_values(self, config):
-        for required in ['saml_endpoint', 'saml_username', 'form_username_field', 'form_password_field']:
+        for required in ['saml_endpoint', 'saml_username',
+                         'form_username_field', 'form_password_field']:
             if required not in config:
                 raise SAMLError(self._ERROR_MISSING_CONFIG % required)
 
@@ -180,8 +181,8 @@ class GenericFormsBasedAuthenticator(SAMLAuthenticator):
         password_field = config['form_password_field']
 
         if username_field not in form_data:
-            raise SAMLError(
-                self._ERROR_MISSING_FORM_FIELD % (username_field, ", ".join(form_data.keys())))
+            raise SAMLError(self._ERROR_MISSING_FORM_FIELD %
+                            (username_field, ", ".join(form_data.keys())))
         else:
             form_data[username_field] = username
         if password_field in form_data:
