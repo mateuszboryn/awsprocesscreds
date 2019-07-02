@@ -67,7 +67,8 @@ class GenericFormsBasedAuthenticator(SAMLAuthenticator):
         'Could not find login form from: %s'
     )
     _ERROR_MISSING_FORM_FIELD = (
-        'Error parsing HTML form, could not find the form field: "%s"'
+        'Error parsing HTML form, could not find the form field: "%s" '
+        'Available fields: %s.'
     )
     _ERROR_LOGIN_FAILED_NON_200 = (
         'Login failed, received non 200 response: %s'
@@ -177,7 +178,7 @@ class GenericFormsBasedAuthenticator(SAMLAuthenticator):
         username = config['saml_username']
         if self.USERNAME_FIELD not in form_data:
             raise SAMLError(
-                self._ERROR_MISSING_FORM_FIELD % self.USERNAME_FIELD)
+                self._ERROR_MISSING_FORM_FIELD % (self.USERNAME_FIELD, ", ".join(form_data.keys())))
         else:
             form_data[self.USERNAME_FIELD] = username
         if self.PASSWORD_FIELD in form_data:
