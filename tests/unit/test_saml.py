@@ -45,6 +45,8 @@ def generic_config():
         'saml_authentication_type': 'form',
         'saml_username': 'monty',
         'role_arn': 'arn:aws:iam::123456789012:role/monty',
+        'form_username_field': 'username',
+        'form_password_field': 'password',
     }
 
 
@@ -55,6 +57,8 @@ def okta_config():
         'saml_authentication_type': 'form',
         'saml_username': 'monty',
         'saml_provider': 'okta',
+        'form_username_field': 'username',
+        'form_password_field': 'password',
     }
 
 
@@ -65,6 +69,8 @@ def adfs_config():
         'saml_authentication_type': 'form',
         'saml_username': 'monty',
         'saml_provider': 'adfs',
+        'form_username_field': 'ctl00$ContentPlaceHolder1$UsernameTextBox',
+        'form_password_field': 'ctl00$ContentPlaceHolder1$PasswordTextBox',
     }
 
 
@@ -124,6 +130,8 @@ class TestSAMLGenericFormsBasedAuthenticator(object):
         config = {
             'saml_endpoint': 'https://example.com',
             'saml_authentication_type': 'form',
+            'form_username_field': 'username',
+            'form_password_field': 'password',
         }
         with pytest.raises(SAMLError, match='Missing required'):
             generic_auth.retrieve_saml_assertion(config)
@@ -132,6 +140,28 @@ class TestSAMLGenericFormsBasedAuthenticator(object):
         config = {
             'saml_username': 'monty',
             'saml_authentication_type': 'form',
+            'form_username_field': 'username',
+            'form_password_field': 'password',
+        }
+        with pytest.raises(SAMLError, match='Missing required'):
+            generic_auth.retrieve_saml_assertion(config)
+
+    def test_config_missing_form_username_field(self, generic_auth):
+        config = {
+            'saml_username': 'monty',
+            'saml_authentication_type': 'form',
+            'saml_endpoint': 'https://example.com',
+            'form_password_field': 'password',
+        }
+        with pytest.raises(SAMLError, match='Missing required'):
+            generic_auth.retrieve_saml_assertion(config)
+
+    def test_config_missing_form_password_field(self, generic_auth):
+        config = {
+            'saml_username': 'monty',
+            'saml_authentication_type': 'form',
+            'saml_endpoint': 'https://example.com',
+            'form_username_field': 'username',
         }
         with pytest.raises(SAMLError, match='Missing required'):
             generic_auth.retrieve_saml_assertion(config)
@@ -150,6 +180,8 @@ class TestSAMLGenericFormsBasedAuthenticator(object):
             'saml_endpoint': 'http://example.com',
             'saml_authentication_type': 'form',
             'saml_username': 'monty',
+            'form_username_field': 'username',
+            'form_password_field': 'password',
         }
         # The error is raised after the call to get the form, but before the
         # call to submit it.
@@ -590,7 +622,7 @@ class TestSAMLCredentialFetcher(object):
         retrieve.return_value = saml_assertion
         fetcher.fetch_credentials()
 
-        cache_key = '0cebd512540a4f5fe2edce26319cf1cf3138684f'
+        cache_key = 'af7a32316c966f76d660f9610c0ec56d91bb2f03'
         assert cache_key in cache
 
     def test_datetime_cache_is_always_serialized(self, fetcher, cache,
@@ -615,7 +647,7 @@ class TestSAMLCredentialFetcher(object):
         retrieve.return_value = saml_assertion
         fetcher.fetch_credentials()
 
-        cache_key = '0cebd512540a4f5fe2edce26319cf1cf3138684f'
+        cache_key = 'af7a32316c966f76d660f9610c0ec56d91bb2f03'
         cache_expiration = cache[cache_key]['Credentials']['Expiration']
         assert not isinstance(cache_expiration, datetime)
         assert cache_expiration == expiration.isoformat()
