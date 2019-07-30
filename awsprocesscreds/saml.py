@@ -79,6 +79,10 @@ class GenericFormsBasedAuthenticator(SAMLAuthenticator):
         'Missing required config value for SAML: "%s"'
     )
 
+    _PASSWORD_PROMPT = (
+        'Password for %s: '
+    )
+
     def __init__(self, password_prompter, requests_session=None):
         """Retrieve SAML assertion using form based auth.
 
@@ -185,9 +189,12 @@ class GenericFormsBasedAuthenticator(SAMLAuthenticator):
                             (username_field, ", ".join(form_data.keys())))
         else:
             form_data[username_field] = username
+
+        # In special cases, password_field is not present in the form
+        # for example when user is remembered.
         if password_field in form_data:
             form_data[password_field] = self._password_prompter(
-                "Password: ")
+                self._PASSWORD_PROMPT % username)
 
     def _send_form_post(self, login_url, form_data):
         response = self._requests_session.post(
